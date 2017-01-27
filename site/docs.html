@@ -1,0 +1,138 @@
+
+<!doctype html>
+<html>
+	<head>
+		<!--<link href="https://fonts.googleapis.com/css?family=Roboto+Slab|Source+Sans+Pro" rel="stylesheet"> -->
+		<link href="assets/fonts/fonts.css" rel="stylesheet">
+		<link href="assets/style.css" rel="stylesheet" />
+		<script src="assets/jquery.min.js" ></script>
+		<script src="assets/script.js" ></script>
+	
+	</head>
+	
+	<body>
+		<header>
+			<div class="logo">
+				<img src="assets/uvalidator.png">
+			</div>
+
+			<nav>
+				<ul>
+					<li><a href="#">Download</a></li>
+					<li><a href="docs.html">Docs</a></li>
+					<li><a href="https://docs.google.com/forms/d/e/1FAIpQLSf3jJ4fPEdC5K7vy7fR83S0CUrsnHrm1mMKfWUnBsil-M8Z7g/viewform">Subscribe</a></li>
+					<li><a href="contribute.html">Contribute</a></li>
+
+				</ul>
+					
+			</nav>
+		</header>
+
+		<div class="container-full">
+			
+			
+			<div class="links">
+				<ul>
+					<li> 
+						<a href="index.html">Introduction</a>
+						<ul >
+							<li><a href="#importance">Importance of Validator</a></li>
+							<li><a href="#inspiration">Inspiration</a></li>
+							<li><a href="#requirements">Requirments</a></li>
+							<li><a href="#installation">Installation</a></li>
+
+						</ul>
+					</li>
+					<li> <a href="quickstart.html">QuickStart</a></li>
+					<li> <a href="validators.html">Validator list</a></li>
+					<li> <a href="advanced_features.html">Advanced Features</a></li>
+		
+				</ul>
+			</div>
+
+			<div class="content">
+				<h1>Introduction</h1>
+				<p class="justify">
+					<b>UniqueValidator</b> (UValidator) is the open source validation library which is  written in PHP  with no external dependancy to validate the user input on the server side and keep your application safe without writing code for validation. You can specify validation rules as attribute in your HTML markup which can be used for server side validation. The library supports all HTML5 validation attributes. 
+				</p>
+
+				<h1 id='importance'>Importance of Validations(For Beginners)</h1>
+				
+				<blockquote>Never trust user input</blockquote>
+				<p class="justify">
+					
+					
+					Most of the basic working  of dynamic web application or any interactive system is to take input from the user, process it and produce the output. While processing the input we should ensure that input is in valid format as the system defined. If input is  in invalid format then the application can be vulnerable  as well as it will be not usable e.g. if we are taking email without validating then we are not able to contact the person. </p>
+					
+					<blockquote>If the information is not in valid format, it's just  a waste</blockquote>
+
+					<h3>Server Side Validations</h3>
+					<ul>
+						<li>Is server side validations are really important? </li>
+						<li>If I am validating the information at client side before submitting the form so validation takes place, Should I valid input  twice?</li>
+						<li>Whether should I waste my server resources such as CPU time, memory on the validation where input is already validated?</li>
+					</ul>
+					<p>
+					The answer is with no doubt <b>Yes</b>. You should always do the server side validation before processing the data. The reason is client side validations can be easily compromised using various techniques. you can learn more about it <a target="_blank" href="http://stackoverflow.com/questions/162159/javascript-client-side-vs-server-side-validation?rq=1">here </a>
+					
+				</p>
+
+				<h1 id="inspiration">Inspiration</h1>
+				<p class="justify">
+					Client side validations are essential for attractive, convinient User Experience and from the usability perspective on the other hand, for security reasons we need server side validation. Although there are tons of validation libraries which easing the works at both sides, writing the validation rules is most irritating task. Server side libraries are often force to write some piece of code for adding validation rules. and for client side we have to write some code in javascript too. The main purpose of library to avoid this duplication. The irritating and frustating jobs of writing validations on server side gives me inspiration for writing this UniqueValidator (UValidator).
+				</p>
+
+				<h1 id="requirements">Requirements</h1>
+				<p> There is no special requirements to using UniqueValidator(UValidator).</p>
+				<ul>
+					<li>PHP 5.x above
+					<li>DOMDocument and DOMXPath Class(always Prebuilt in PHP)
+				</ul>
+
+				<h1 id="installation">Installation</h1> 
+				<p> The following steps you can follow to install/configure the UniqueValidator in your project.</p>
+				<ol>
+					<li>Unzip the downloaded zip file 
+					<li>Put into your web application directory.
+					<li>To check everything is fine you can run demos located at 'demos' folder in UValidator
+					<li>browse to your_domain.com/Path_to_validator/demos/
+					<li>Use the library in your PHP Script by including it. 
+				
+				<pre><code><xmp>
+<?php
+ include "<your_application_directory>/UValidator/src/autoload.php";
+ use UniqueValidator\UValidator;
+
+ $uv = new UValidator("form_path#form_id");
+ $result = $uv->valdate();
+ if(!$result) {
+ 	# validation errors are occured you can get it by.
+ 	$errors = $uv->getErrors();
+ }
+?>
+
+</xmp></code></pre>
+				</ol>
+				<h1>Next...</h1>
+				<ul>
+					<li>To getting started we would recommmend to see <a href="quickstart.html">Quick Start</a>.
+					<li><a href="advanced_features.html">Advanced features</a></li>	
+				</ul>
+			</div>
+		</div>
+		<div class="footer">
+			<div class="copyright">&copy 2017 Siddhesh Tamhanekar, UniqueValidator. All rights reserved.</div>
+		</div>
+	</body>
+</html>	
+
+<script src="http://www.jacklmoore.com/colorbox/jquery.colorbox.js"></script>
+		<link rel="stylesheet" href="http://www.jacklmoore.com/colorbox/example2/colorbox.css" />
+	
+	<a class='iframe' style="display:none"href="https://docs.google.com/forms/d/e/1FAIpQLSf3jJ4fPEdC5K7vy7fR83S0CUrsnHrm1mMKfWUnBsil-M8Z7g/viewform">Outside Webpage (Iframe)</a>
+	
+
+	<script>
+
+	//	$(".iframe").colorbox({iframe:true, width:"35%", height:"600px",scrolling:false,open:true,transition:'fade'});
+	</script>

@@ -1,0 +1,262 @@
+	
+<!doctype html>
+<html>
+	<head>
+		<!--<link href="https://fonts.googleapis.com/css?family=Roboto+Slab|Source+Sans+Pro" rel="stylesheet"> -->
+		<link href="assets/fonts/fonts.css" rel="stylesheet">
+		<link href="assets/style.css" rel="stylesheet" />
+		<script src="assets/jquery.min.js" ></script>
+		<script src="assets/script.js" ></script>
+	
+	</head>
+	
+	<body>
+		<header>
+			<div class="logo">
+				<img src="assets/uvalidator.png">
+			</div>
+
+			<nav>
+				<ul>
+					<li><a href="#">Documentation</a></li>
+					<li><a href="#">Contribute</a></li>
+
+				</ul>
+					
+			</nav>
+		</header>
+
+		<div class="container-full">
+			
+			
+			<div class="links">
+				<ul>
+					<li> 
+						<a href="index.html">Introduction</a>
+						
+					</li>
+					<li> <a href="quickstart.html">Quick Start</a></li>
+					<li> <a href="validators.html">Validator List</a></li>
+						<ul >
+							<li><a href="#req">Required</a></li>
+							<li><a href="#pattern">Pattern</a></li>
+							<li><a href="#text">Text</a></li>
+							<li><a href="#number">Number</a></li>
+							<li><a href="#date">Date</a></li>
+							<li><a href="#url">Url</a></li>
+							<li><a href="#checkbox">Checkbox</a></li>
+							<li><a href="#radio">Radio</a></li>
+							<li><a href="#select">Select</a></li>	
+							<li><a href="#textarea">Textarea</a></li>
+							<li><a href="#readonly">Readonly</a></li>
+							<li><a href="#default">Default</a></li>
+
+						</ul>
+					<li> <a href="advanced_features.html">Advanced Features</a></li>
+		
+
+				</ul>
+			</div>
+
+			<div class="content">
+				<h1>Validators </h1>
+				<p>
+				Here is growing list of validators supported by Unique Validator (UValidtaor).
+				</p>
+				
+<!-- Required validator -->
+				<h3 id="req">Required Validator</h3>
+				
+				<p>This validator validate if field is empty or not. It is also supported by HTML5 validations.
+					You can use this validator in input as well as select tag.</p>
+
+
+				<p>You can use this by adding 'required' attribute in the input/select tag</p>
+
+				<b>Example:</b>
+ 					<pre><xmp>
+ <input required ... />
+
+ <select required ..> ... </select>
+ </xmp></pre>
+
+<!-- Pattern Validator -->
+				<h3 id="pattern">Pattern Validator</h3>
+				
+				<p>This validator validate input against specified pattern.
+					pattern should be specifed as PHP regular expression. for know more about pattern syntax of php regular expression refer <a href="http://php.net/manual/en/reference.pcre.pattern.syntax.php">here</a></p>
+
+
+				<p>You can use this by adding attributes ' pattern="add pattern here" ' in the input tag</p>
+
+				<b>Example:</b>
+ 					<pre><xmp>
+ <input type="text" pattern="[a-zA-Z]*" />
+ </xmp></pre>
+
+<!-- TEXT validator -->
+				<h3 id="text">Text Validator</h3>	
+				
+				<p>This validator validates if field contains the input is as specified for doing it it's depended on other attributes like min,max</p>
+
+
+				<p>Validator is automatically added when markup specify input tag type attribute as text.</p>
+				<b>Supported Attributes:</b>
+				<ul>
+					<li>min : for minimum length of string supported by field.
+					<li>max : maximum length of the string supported by field.
+				</ul>
+				<b>Example:</b>
+ 					<pre><xmp>
+ <input type="text" min="3" max= "20">
+ </xmp></pre>
+
+<!-- number validator -->
+				<h3 id="number">Number Validator</h3>	
+				
+				<p>This validator validates if field contains the numeric value and it's in the defined range.</p>
+
+
+				<p>Validator is automatically added when markup specify input tag type attribute as number.</p>
+				<b>Supported Attributes:</b>
+				<ul>
+					<li>min : for minimum number supported by field.
+					<li>max : maximum number supported by field.
+				</ul>
+				<b>Example:</b>
+ 					<pre><xmp>
+ <input type="number" min="3" max= "20">
+ </xmp></pre>
+
+<!-- date validator -->
+				<h3 id="date">Date Validator</h3>	
+				
+				<p>This validator validates date, it's format and it's in provided range.</p>
+
+
+				<p>Validator is automatically added when markup specify input tag type attribute as date.</p>
+				<b>Supported Attributes:</b>
+				<ul>
+					<li> min : for minimum date supported by field.
+					<li> max : for maximum date supported by  field.
+					<li> format : format of the date as per <a href="http://php.net/manual/en/datetime.formats.date.php">PHP date formats</a>. Default format is (Y-m-d)
+				</ul>
+				<b>Example:</b>
+ 					<pre><xmp>
+ <input type='date' min="2010-12-12" max="2016-12-12" data-format="Y-m-d" />
+ </xmp></pre>
+
+<!-- url validator -->
+				<h3 id="url">Url Validator</h3>	
+				
+				<p>This validator validates url against regular expression .</p>
+
+
+				<p>Validator is automatically added when markup specify input tag type attribute as url.</p>
+				
+				<b>Example:</b>
+ 					<pre><xmp>
+ <input type="url" >
+ </xmp></pre>
+
+<!-- checkbox validator -->
+				<h3 id="checkbox">Checkbox Validator</h3>	
+				
+				<p>Validator validates the submitted value is valid (one of the checkboxes value) and it also checks minimum and maximum checked checkboxes properly.</p>
+
+
+				<p>Validator is automatically added when markup specify input tag type attribute as "checkbox".</p>
+				<b>Supported Attributes:</b>
+				<ul>
+					<li> min : for minimum required checkboxes.
+					<li> max : maximum checkboxes can be checked.
+			
+				</ul>
+				<div class="info">If you are using multiple checkboxes with same name then place all the validation attributes at first checkbox </div>
+				<b>Example:</b>
+ 					<pre><xmp>
+ <input type="checkbox" name="fav_sports[]" value="cricket" min=1  > Cricket
+ <input type="checkbox" name="fav_sports[]" value="football" > Football
+
+</xmp></pre>
+
+<!-- Radio validator -->
+				<h3 id="radio">Radio Validator</h3>	
+				
+				<p>Validator validates the submitted value is valid (one of the radio input value value) 
+</p>
+
+
+				<p>Validator is automatically added when markup specify input tag type attribute as "radio".</p>
+				<div class="info">If you are using multiple radio inputs with same name then place all the validation attributes at first radio input field </div>
+				<b>Example:</b>
+ 					<pre><xmp>
+ <input type='radio' name="gender" value="male" required> Male
+ <input type='radio' name="gender" value="female" > Female
+ </xmp></pre>
+
+<!-- select validator -->
+				<h3 id="select">Select Validator</h3>	
+				
+				<p>Validator validates the submitted value is valid (one of the option value) and it also checks minimum and maximum checked properly.
+				</p>
+
+
+				<p>Validator is automatically added when markup specify select tag.</p>
+				<b>Supported Attributes:</b>
+				<ul>
+					<li> min : for minimum options should be selected if multiple attribute is added.
+					<li> max : maximum options can be selected if multiple attribute is added.
+					<li> data-checkvalue : if this attribute is present validator will not parse all the options for listing valid values<br/> 
+					The attribute is useful when your  dropdown has large no of values like country, city, state dropdown has if we maintain all values at server side we require large memory which doesn't seem to be a feasible solution so we recommend if you have large values for select then use this attribute and use custom callback function to validate valid value.
+				</ul>
+				<b>Example:</b>
+ 					<pre><xmp>
+ <select name='select'> ....</select>
+
+ <select multiple min="2" max="5" name='select'> ....</select>
+ 			</xmp></pre>
+
+<!-- Textarea validator -->
+				<h3 id="textarea">Textarea Validator</h3>	
+				<p> same as <a href="#text">Text Validator</a>
+
+<!-- Readonly validator -->
+				<h3 id="readonly">Readonly Validator</h3>	
+				
+				<p>This validator ensures that the value of field will never changed by user  </p>
+
+
+				<p>Validator is automatically added when markup specify input tag has readonly </p>
+				
+				<b>Example:</b>
+ 					<pre><xmp>
+ <input type="hidden" name="user_id" value="123" readonly />
+ </xmp></pre>
+
+<!-- Readonly validator -->
+				<h3 id="default">Default Validator</h3>	
+				
+				<p>This validator ensures that the value of field should changed by user ie form cannot be submitted before changing the input field value. </p>
+
+				<p> it is not html5 validator it's custom validator given by Uniquevalidator so you have to use it by prefixing 'data-uv-'
+				<p>Validator can be added by adding data-uv-default </p>
+				
+				<b>Example:</b>
+ 					<pre><xmp>
+ <input type="text" name="full name" value="Siddhesh Tamhanekar" readonly />
+ </xmp></pre>
+
+				<h1>Next...</h1>
+				<ul>
+					<li><a href="advanced_features.html">Advanced features</a></li>	
+				</ul>
+			</div>
+		</div>
+		
+		
+		<div class="footer">
+			<div class="copyright">&copy 2017 UniqueValidator. All rights reserved.</div>
+		</div>
+	</body>
+</html>
