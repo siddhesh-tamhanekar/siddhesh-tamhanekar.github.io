@@ -1,0 +1,93 @@
+@media (max-width: 600px) {
+
+header{height:auto;position:inherit;}
+
+header .logo{width:60%;margin:auto;float:none;}
+
+a.navtoggle {
+    color: white;
+    border: 1px solid;
+    text-decoration: none;
+    line-height: 45px;
+    padding: 0 10px;
+    font-weight: bold;
+    float: left;
+    display:block !important;
+}
+header nav{
+	display:none;
+	float:none;
+	border-top:2px solid #FFF;
+}
+header nav  ul li{
+	display: block;
+	border-bottom:2px solid #fff;
+}
+header nav ul li a{
+	display: block;
+	padding:10px;
+	line-height: 20px;
+}
+
+.container{
+	padding:10px !important;
+}
+
+.container-full{
+	padding-top:10px;
+}
+
+.links {
+	position:initial !important;
+	width:100%;
+}
+
+.content{
+	width:auto !important;
+	padding:0 15px;
+	margin-left:0px !important;
+	border:none;
+}
+
+.content h1{
+	font-size:1.5em;
+}
+
+body, html { overflow-x:hidden; }
+
+
+.clearfix:after {
+     visibility: hidden;
+     display: block;
+     font-size: 0;
+     content: " ";
+     clear: both;
+     height: 0;
+     }
+.clearfix { display: inline-block; }
+/* start commented backslash hack \*/
+* html .clearfix { height: 1%; }
+.clearfix { display: block; }
+
+:target:before {
+  content:"";
+  display:block;
+  height:0px; /* fixed header height*/
+  margin:0 0 0; /* negative fixed header height */
+}
+
+.btn-container{
+	padding-top: 40px !important;
+	width:100% !important;
+}
+.btn-container p{
+	width:80% !important;
+}
+}
+
+pre{
+	overflow:auto;
+}
+a.navtoggle {
+display:none
+}

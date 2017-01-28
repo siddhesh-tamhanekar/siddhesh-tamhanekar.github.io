@@ -14,7 +14,8 @@
 		<META NAME="ROBOTS" CONTENT="INDEX, FOLLOW">
 		<link href="assets/fonts/fonts.css" rel="stylesheet">
 		<link href="assets/style.css" rel="stylesheet" />
-	
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<link href="assets/style-mobile.css" rel="stylesheet" />	
 	</head>
 	
 	<body>
@@ -218,7 +219,7 @@
 				<ul>
 					<li> min : for minimum options should be selected if multiple attribute is added.
 					<li> max : maximum options can be selected if multiple attribute is added.
-					<li> data-checkvalue : if this attribute is present validator will not parse all the options for listing valid values<br/> 
+					<li> data-checkvalue : if this attribute is present in select tag, validator will not parse  options for listing valid values<br/> 
 					The attribute is useful when your  dropdown has large no of values like country, city, state dropdown has if we maintain all values at server side we require large memory which doesn't seem to be a feasible solution so we recommend if you have large values for select then use this attribute and use custom callback function to validate valid value.
 				</ul>
 				<b>Example:</b>
