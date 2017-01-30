@@ -156,7 +156,14 @@
 		<script src="assets/script.js" ></script>
 		<script src="assets/colorbox-min.js" ></script>
 	<script>
+	$(function(){
 
-		$(".iframe").colorbox({iframe:true, width:"35%", height:"600px",scrolling:false,open:true,transition:'fade'});
+	if($("body").hasClass("mobile"))
+		w = "95%";
+	else
+		w = "35%";
+		$(".iframe").colorbox({iframe:true, width:w, height:"650px",scrolling:false,open:true,transition:'fade'});
+	});
+	
 	</script>
 	
