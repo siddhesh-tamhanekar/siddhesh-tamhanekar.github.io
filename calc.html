@@ -1,0 +1,175 @@
+<html>
+	<head>
+		<style>
+			table td{
+				padding:10px;
+				border:1px solid gray;
+				text-align:right;
+			}
+
+			table{
+				border-collapse:collapse;
+				border:1px solid gray;
+			}
+			.yellow{
+				background:yellow;
+			}
+
+		</style>
+	</head>
+
+	<body>
+		<input type='file' id='file'> <br>
+		<input type='text' id='close'> <br>
+		<input type='submit' onClick='analyze()'>
+		<div id="results">
+
+		</div>
+
+		<script>
+			function analyze(){
+				const fileInput = document.getElementById('file')
+				const closeInput = document.getElementById('close')
+				const close = closeInput.value;
+				if(fileInput.files.length == 0 ){
+					alert("please add file")
+					return
+				}
+				const [file] = fileInput.files
+				const reader = new FileReader();
+				const data = []
+				reader.addEventListener("load", () => {
+					// this will then display a text file
+					reader.result.split('\r\n').forEach( (value ) => {
+						if(-1 == value.indexOf('BANKNIFTY')  ) {
+							return
+						}
+						line = value.split(",");
+						if(line.length != 15) {
+							alert("wrong file columns")
+							return
+						}
+						processLine(line)
+
+					});
+					for(var i in data) {
+						v = data[i]
+						console.log(i,v)
+						v['CE']['per_oi'] = formatNumber(v['CE']['itmoi'] / v['CE']['oi'])
+						v['PE']['per_oi'] = formatNumber(v['PE']['itmoi'] / v['PE']['oi'])
+						v['CE']['per_coi'] =formatNumber( v['CE']['itmcoi'] / v['CE']['coi'])
+						v['PE']['per_coi'] =formatNumber( v['PE']['itmcoi'] / v['PE']['coi'])
+						data[i] = v
+					}
+					console.log(data)
+					display(data)
+				}, false);
+
+				function formatNumber(n) {
+					if(n) {
+						return (n*100).toFixed(2)
+
+					}else {
+						return n;
+					}
+				}
+				function processLine(line ) {
+					if(line[0] == 'FUTIDX') return
+					if(line[1] != 'BANKNIFTY') return
+					const expDate = new Date(line[2])
+					const exp = expDate.getFullYear() + "/"+(expDate.getMonth()+1)+"/"+ expDate.getDate();
+					if(expDate.getFullYear() > 2022){
+						return
+					}
+					const sp = parseInt(line[3])
+					const optionType = line[4]
+
+					const settlementPrice = parseFloat(line[9])
+
+					const oi = parseInt(line[12])
+					const coi = parseInt(line[13])
+
+					const voi = settlementPrice * oi
+					const vcoi = settlementPrice * coi
+					if (undefined === data[exp]) {
+						data[exp] = {
+							'date': expDate.toDateString(),
+							'CE': {
+								'oi' :0,
+								'coi': 0,
+								'itmoi' : 0,
+								'itmcoi' : 0,
+								'per':0
+							},
+							'PE': {
+								'oi' :0,
+								'coi': 0,
+								'itmoi' : 0,
+								'itmcoi' : 0,
+								'per':0
+							},
+
+
+						}
+					}
+					if(sp>= close && optionType == 'PE' ) {
+						data[exp][optionType]['itmoi'] += voi
+						data[exp][optionType]['itmcoi'] += vcoi
+					}
+
+					if(sp<= close && optionType == 'CE' ) {
+						data[exp][optionType]['itmoi'] += voi
+						data[exp][optionType]['itmcoi'] += vcoi
+					}
+					data[exp][optionType]['oi'] += voi
+					data[exp][optionType]['coi'] += vcoi
+
+				}
+
+				function display(data) {
+					html = `
+			<table>
+				<tr>
+					<td> Expiry</td>
+					<td> CE ITM OI</td>
+					<td> CE OI</td>
+					<td class="yellow"> CE OI %</td>
+					<td> CE ITM COI</td>
+					<td> CE COI</td>
+					<td class="yellow"> CE COI %</td>
+					<td> PE ITM OI</td>
+					<td> PE OI</td>
+					<td class="yellow"> PE OI %</td>
+					<td> PE ITM COI</td>
+					<td> PE COI</td>
+					<td class="yellow"> PE COI %</td>
+				</tr>`
+
+					for(var i in data) {
+						html+=`<tr>
+					<td> ${i}</td>
+					<td> ${data[i]['CE']['itmoi']}</td>
+					<td> ${data[i]['CE']['oi']}</td>
+					<td class="yellow"> ${data[i]['CE']['per_oi']}</td>
+					<td> ${data[i]['CE']['itmcoi']}</td>
+					<td> ${data[i]['CE']['coi']}</td>
+					<td class="yellow"> ${data[i]['CE']['per_coi']}</td>
+					<td> ${data[i]['PE']['itmoi']}</td>
+					<td> ${data[i]['PE']['oi']}</td>
+					<td class="yellow"> ${data[i]['PE']['per_oi']}</td>
+					<td> ${data[i]['PE']['itmcoi']}</td>
+					<td> ${data[i]['PE']['coi']}</td>
+					<td class="yellow"> ${data[i]['PE']['per_coi']}</td>
+				</tr>`
+					}
+					html+=`</table>
+			`;
+					document.getElementById('results').innerHTML = html
+				}
+				reader.readAsText( file )
+			}
+
+
+		</script>
+	</body>
+</html>
