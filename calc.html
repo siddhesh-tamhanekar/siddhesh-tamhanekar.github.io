@@ -73,7 +73,7 @@ input[type='submit'] {
 				const data = []
 				reader.addEventListener("load", () => {
 					// this will then display a text file
-					reader.result.split('\r\n').forEach( (value ) => {
+					reader.result.split('\n').forEach( (value ) => {
 						if(-1 == value.indexOf('BANKNIFTY')  ) {
 							return
 						}
