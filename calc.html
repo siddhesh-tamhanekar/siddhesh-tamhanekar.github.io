@@ -19,9 +19,22 @@
 	</head>
 
 	<body>
-		<input type='file' id='file'> <br>
-		<input type='text' id='close'> <br>
-		<input type='submit' onClick='analyze()'>
+		<div class='flex'>
+			<div>
+				<label> BHavcopy Upload </label><br>
+				<input type='file' id='file'> 
+
+			</div>	
+			<div>
+					<label> Close Price </label><br>
+					<input type='text' id='close'> <br>
+
+			</div>	
+			<div>
+				<input type='submit' onClick='analyze()'>
+
+			</div>	
+		</div>
 		<div id="results">
 
 		</div>
