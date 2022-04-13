@@ -1,6 +1,7 @@
 <html>
 	<head>
 		<script src="https://unpkg.com/dayjs@1.8.21/dayjs.min.js"></script>
+		<script src="https://gildas-lormeau.github.io/zip.js/demos/lib/zip.min.js" ></script>
 		<style>
 			table td{
 				padding:10px;
@@ -69,11 +70,16 @@ input[type='submit'] {
 					return
 				}
 				const [file] = fileInput.files
+				
+				
 				const reader = new FileReader();
 				const data = []
-				reader.addEventListener("load", () => {
-					// this will then display a text file
-					reader.result.split('\n').forEach( (value ) => {
+				var optionChainHtml = ''
+				const entries =  (new zip.ZipReader(new zip.BlobReader(file))).getEntries()
+				.then((entries) => entries[0].getData(new zip.TextWriter()))
+				.then((content) =>  {
+					
+					content.split('\n').forEach( (value ) => {
 						if(-1 == value.indexOf('BANKNIFTY')  ) {
 							return
 						}
@@ -96,7 +102,7 @@ input[type='submit'] {
 					}
 					console.log(data)
 					display(data)
-				}, false);
+				});
 
 				function formatNumber(n) {
 					if(n) {
@@ -163,23 +169,23 @@ input[type='submit'] {
 				}
 
 				function display(data) {
-					html = `
-			<table>
-				<tr>
-					<td> Expiry</td>
-					<td> CE ITM OI</td>
-					<td> CE OI</td>
-					<td class="yellow"> CE OI %</td>
-					<td> CE ITM COI</td>
-					<td> CE COI</td>
-					<td class="yellow"> CE COI %</td>
-					<td> PE ITM OI</td>
-					<td> PE OI</td>
-					<td class="yellow"> PE OI %</td>
-					<td> PE ITM COI</td>
-					<td> PE COI</td>
-					<td class="yellow"> PE COI %</td>
-				</tr>`
+					html = `<table>
+								<tr><td colspan='13'>OI Data Total</td></tr>					
+								<tr>
+									<td> Expiry</td>
+									<td> CE ITM OI</td>
+									<td> CE OI</td>
+									<td class="yellow"> CE OI %</td>
+									<td> CE ITM COI</td>
+									<td> CE COI</td>
+									<td class="yellow"> CE COI %</td>
+									<td> PE ITM OI</td>
+									<td> PE OI</td>
+									<td class="yellow"> PE OI %</td>
+									<td> PE ITM COI</td>
+									<td> PE COI</td>
+									<td class="yellow"> PE COI %</td>
+								</tr>`
 
 					for(var i in data) {
 						html+=`<tr>
@@ -199,10 +205,24 @@ input[type='submit'] {
 				</tr>`
 					}
 					html+=`</table>
-			`;
+					<table>
+						<tr>
+							<td>COI %</td>
+							<td>OI Chg</td>
+							<td>OI</td>
+							<td>LTP</td>
+							<td>Strike Price</td>
+							<td>LTP</td>
+							<td> OI </td>
+							<td>OI Chg</td>
+							<td> COI % </td>
+						</tr>
+						
+					`;
+					html+='</table>'
 					document.getElementById('results').innerHTML = html
 				}
-				reader.readAsText( file )
+				
 			}
 
 
