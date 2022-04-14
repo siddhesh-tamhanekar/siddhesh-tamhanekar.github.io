@@ -17,45 +17,64 @@
 				background:yellow;
 			}
 			.flex {
-    display: flex;
-    align-items: center;
-}
-.flex label, .flex input{
-    display:inline-block;
-    
-}
-br{
-    display:none;
-}
+				display: flex;
+				align-items: center;
+			}
+			.flex label, .flex input{
+				display:inline-block;				
+			}
+			br{
+				display:none;
+			}
 
-input{
-    padding:5px 20px;
-    margin:2px 4px;
-    
-}
-input[type='submit'] {
-}
-
+			input{
+				padding:5px 20px;
+				margin:2px 4px;
+				
+			}
+			input[type='submit'] {
+			}
+			#option-chain.round-levels-only tbody tr{
+				display:none;
+			}
+			#option-chain.round-levels-only tbody tr.round-or-atm{
+				display:table-row;
+			}
+			.input-form {
+				border:1px solid #ddd;
+				padding:12px;
+				margin-bottom:16px;
+			}
+#option-chain{margin-top:16px;}
 		</style>
 	</head>
 
 	<body>
-		<div class='flex'>
+		<h4 style='text-align:center'>Bhavcopy UI representation for BANKNIFTY</h4>
+		<div class='flex input-form'>
 			<div>
-				<label> BHavcopy Upload </label><br>
+				<label> Upload Fno BhavCopy (zip) </label><br>
 				<input type='file' id='file'> 
-
+				<input type='hidden' id='roundNumber' value='500'>
 			</div>	
 			<div>
 					<label> Close Price </label><br>
 					<input type='text' id='close'> <br>
-
 			</div>	
 			<div>
 				<input type='submit' onClick='analyze()'>
 
 			</div>	
 		</div>
+		<small>
+		Notes: 
+			<ul>
+				<li>All dates are in yyyy/m/d format</li>
+				<li>LTP in option chain data is close price from bhavcopy</li>
+				<li>Option Chain data is shown only from  atm - 2500 to atm + 2500 strike prices </li>
+				<li>Total OI Data calculations are done using settlementPrice</li>
+			</ul>
+		</small>
 		<div id="results">
 
 		</div>
@@ -65,6 +84,8 @@ input[type='submit'] {
 				const fileInput = document.getElementById('file')
 				const closeInput = document.getElementById('close')
 				const close = closeInput.value;
+				const atm = Math.trunc( close / 100 ) * 100
+				const roundNumber = 500
 				if(fileInput.files.length == 0 ){
 					alert("please add file")
 					return
@@ -74,7 +95,7 @@ input[type='submit'] {
 				
 				const reader = new FileReader();
 				const data = []
-				var optionChainHtml = ''
+				const optionChainData = []
 				const entries =  (new zip.ZipReader(new zip.BlobReader(file))).getEntries()
 				.then((entries) => entries[0].getData(new zip.TextWriter()))
 				.then((content) =>  {
@@ -93,15 +114,15 @@ input[type='submit'] {
 					});
 					for(var i in data) {
 						v = data[i]
-						console.log(i,v)
+						//console.log(i,v)
 						v['CE']['per_oi'] = formatNumber(v['CE']['itmoi'] / v['CE']['oi'])
 						v['PE']['per_oi'] = formatNumber(v['PE']['itmoi'] / v['PE']['oi'])
 						v['CE']['per_coi'] =formatNumber( v['CE']['itmcoi'] / v['CE']['coi'])
 						v['PE']['per_coi'] =formatNumber( v['PE']['itmcoi'] / v['PE']['coi'])
 						data[i] = v
 					}
-					console.log(data)
 					display(data)
+				
 				});
 
 				function formatNumber(n) {
@@ -130,9 +151,39 @@ input[type='submit'] {
 
 					const oi = parseInt(line[12])
 					const coi = parseInt(line[13])
-
+					
 					const voi = settlementPrice * oi
 					const vcoi = settlementPrice * coi
+					
+					
+					if (undefined === optionChainData[exp]) {
+						optionChainData[exp] = []
+					}
+					if (undefined === optionChainData[exp][sp]) {
+						optionChainData[exp][sp] = {
+							'date': expDate.toDateString(),
+							'CE': {
+								'ltp': '',
+								'oi' :'',
+								'coi': '',
+								'per':'',
+							},
+							'PE': {
+								'ltp': '',
+								'oi' :'',
+								'coi': '',
+								'per':'',
+							},
+
+
+						}
+					}
+					optionChainData[exp][sp][optionType]['ltp'] = parseFloat(line[8])
+					optionChainData[exp][sp][optionType]['oi'] = oi
+					optionChainData[exp][sp][optionType]['coi'] = coi
+					optionChainData[exp][sp][optionType]['voi'] = voi
+					optionChainData[exp][sp][optionType]['vcoi'] = vcoi
+					optionChainData[exp][sp][optionType]['per'] = formatNumber(coi/ oi)
 					if (undefined === data[exp]) {
 						data[exp] = {
 							'date': expDate.toDateString(),
@@ -170,7 +221,7 @@ input[type='submit'] {
 
 				function display(data) {
 					html = `<table>
-								<tr><td colspan='13'>OI Data Total</td></tr>					
+								<tr><td style="text-align:center" colspan='13'>EOD Total OI Data</td></tr>					
 								<tr>
 									<td> Expiry</td>
 									<td> CE ITM OI</td>
@@ -204,26 +255,90 @@ input[type='submit'] {
 					<td class="yellow"> ${data[i]['PE']['per_coi']}</td>
 				</tr>`
 					}
+					
+					expiries = Object.keys(optionChainData)
+					expiry_dropdown = '<select id="exp-dropdown">'
+					for (var i in expiries) {
+						expiry_dropdown +='<option value="'+ expiries[i] +'">' + expiries[i] +'</option>'
+					}
+					expiry_dropdown += '</select>'
+					//console.log(expiry_dropdown)
+					selectedExpiry  = expiries[0]
 					html+=`</table>
-					<table>
-						<tr>
-							<td>COI %</td>
-							<td>OI Chg</td>
-							<td>OI</td>
-							<td>LTP</td>
-							<td>Strike Price</td>
-							<td>LTP</td>
-							<td> OI </td>
-							<td>OI Chg</td>
-							<td> COI % </td>
-						</tr>
+					
+					<table id="option-chain" >
+						<thead>
+							<tr>
+								<td style='text-align:center' colspan='5'> EOD OPTION CHAIN</td>
+								<td colspan='2'> <label ><input type='checkbox' id='show-round-toggle' />Show Round Levels Only </label></td>
+								
+								<td colspan='2'> ${expiry_dropdown} </td>
+							</tr>
+							<tr>
+								<td>COI %</td>
+								<td>OI Chg</td>
+								<td>OI</td>
+								<td>LTP</td>
+								<td>Strike Price</td>
+								<td>LTP</td>
+								<td> OI </td>
+								<td>OI Chg</td>
+								<td> COI % </td>
+							</tr>
+						<thead>
+						<tbody>
+						</tbody>
 						
 					`;
+					
 					html+='</table>'
 					document.getElementById('results').innerHTML = html
+					document.getElementById('exp-dropdown').addEventListener('change',(e)=>{
+						v = e.target.value
+						showDataForExpiry(v)
+					},false)
+					document.getElementById('show-round-toggle').addEventListener('change',(e)=>{
+						v = e.target.value
+						if(v) {
+							document.getElementById('option-chain').classList.add('round-levels-only')
+						} else {
+							document.getElementById('option-chain').classList.remove('round-levels-only')
+						}
+					},false)
+					showDataForExpiry(selectedExpiry)
+				}
+				
+				function showDataForExpiry(exp) {
+					ocdata =''
+					for(var i in optionChainData[exp]) {
+						if( i < (atm-2500) || i> (atm+2500) ) continue
+						ocdata += `
+							<tr class='${isRoundOrATM(i,atm)?'round-or-atm':''} ${atm == i?'yellow':''}'>
+								<td> ${optionChainData[exp][i]['CE']['per']} </td>
+								<td> ${optionChainData[exp][i]['CE']['coi']} </td>
+								<td> ${optionChainData[exp][i]['CE']['oi']} </td>
+								<td> ${optionChainData[exp][i]['CE']['ltp']} </td>
+								<td> ${i} </td>
+								<td> ${optionChainData[exp][i]['PE']['ltp']} </td>
+								<td> ${optionChainData[exp][i]['PE']['oi']} </td>
+								<td> ${optionChainData[exp][i]['PE']['coi']} </td>
+								<td> ${optionChainData[exp][i]['PE']['per']} </td>
+							</tr>
+						`
+					}
+					document.querySelector('#option-chain tbody').innerHTML = ocdata
 				}
 				
 			}
+			function isRoundOrATM(intNumber, atm) {
+			roundNumber = document.getElementById('roundNumber').value
+				var res = intNumber % roundNumber == 0
+				if(!res) {
+					res = intNumber == atm 
+				}
+				return res
+			}
+			
 
 
 		</script>
