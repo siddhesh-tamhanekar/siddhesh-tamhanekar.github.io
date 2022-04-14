@@ -65,11 +65,14 @@
 				<input type='submit' onClick='analyze()'>
 
 			</div>	
+			<div id='bhavcopy-details'></div>
 		</div>
 		<small>
 		Notes: 
 			<ul>
 				<li>All dates are in yyyy/m/d format</li>
+				<li>Provide closing price of the respective day as per your preference spot/future</li>
+				<li> if closing price is not provided then by default banknifty first future price from bhavcopy is retrived
 				<li>LTP in option chain data is close price from bhavcopy</li>
 				<li>Option Chain data is shown only from  atm - 2500 to atm + 2500 strike prices </li>
 				<li>Total OI Data calculations are done using settlementPrice</li>
@@ -83,8 +86,9 @@
 			function analyze(){
 				const fileInput = document.getElementById('file')
 				const closeInput = document.getElementById('close')
-				const close = closeInput.value;
-				const atm = Math.trunc( close / 100 ) * 100
+				document.getElementById('bhavcopy-details').innerHTML=''
+				 close = closeInput.value;
+				 atm = Math.trunc( close / 100 ) * 100
 				const roundNumber = 500
 				if(fileInput.files.length == 0 ){
 					alert("please add file")
@@ -134,7 +138,21 @@
 					}
 				}
 				function processLine(line ) {
-					if(line[0] == 'FUTIDX') return
+					if(line[0] == 'FUTIDX') {
+						if(line[1] == 'BANKNIFTY') {
+						bhavCopyDiv = document.getElementById('bhavcopy-details')
+							if(bhavCopyDiv.innerHTML == '') {
+								bhtml = '<p>BhavCopy Date = ' + line[14] +'</p>'
+								bhavCopyDiv.innerHTML = bhtml
+								if(!close) {
+									close = parseFloat(line[8])
+									atm = Math.trunc( close / 100 ) * 100
+									document.getElementById('close').value = close
+								}
+							}
+						}
+						return
+					}
 					if(line[1] != 'BANKNIFTY') return
 					const expDate = new Date(line[2])
 					var day = dayjs(expDate)
@@ -243,16 +261,16 @@
 					<td> ${i}</td>
 					<td> ${data[i]['CE']['itmoi']}</td>
 					<td> ${data[i]['CE']['oi']}</td>
-					<td class="yellow"> ${data[i]['CE']['per_oi']}</td>
+					<td class="yellow"> ${data[i]['CE']['per_oi']} %</td>
 					<td> ${data[i]['CE']['itmcoi']}</td>
 					<td> ${data[i]['CE']['coi']}</td>
-					<td class="yellow"> ${data[i]['CE']['per_coi']}</td>
+					<td class="yellow"> ${data[i]['CE']['per_coi']} %</td>
 					<td> ${data[i]['PE']['itmoi']}</td>
 					<td> ${data[i]['PE']['oi']}</td>
-					<td class="yellow"> ${data[i]['PE']['per_oi']}</td>
+					<td class="yellow"> ${data[i]['PE']['per_oi']} %</td>
 					<td> ${data[i]['PE']['itmcoi']}</td>
 					<td> ${data[i]['PE']['coi']}</td>
-					<td class="yellow"> ${data[i]['PE']['per_coi']}</td>
+					<td class="yellow"> ${data[i]['PE']['per_coi']} %</td>
 				</tr>`
 					}
 					
@@ -314,7 +332,7 @@
 						if( i < (atm-2500) || i> (atm+2500) ) continue
 						ocdata += `
 							<tr class='${isRoundOrATM(i,atm)?'round-or-atm':''} ${atm == i?'yellow':''}'>
-								<td> ${optionChainData[exp][i]['CE']['per']} </td>
+								<td> ${optionChainData[exp][i]['CE']['per']} % </td>
 								<td> ${optionChainData[exp][i]['CE']['coi']} </td>
 								<td> ${optionChainData[exp][i]['CE']['oi']} </td>
 								<td> ${optionChainData[exp][i]['CE']['ltp']} </td>
@@ -322,7 +340,7 @@
 								<td> ${optionChainData[exp][i]['PE']['ltp']} </td>
 								<td> ${optionChainData[exp][i]['PE']['oi']} </td>
 								<td> ${optionChainData[exp][i]['PE']['coi']} </td>
-								<td> ${optionChainData[exp][i]['PE']['per']} </td>
+								<td> ${optionChainData[exp][i]['PE']['per']} % </td>
 							</tr>
 						`
 					}
