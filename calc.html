@@ -1,3 +1,4 @@
+
 <html>
 	<head>
 		<script src="https://unpkg.com/dayjs@1.8.21/dayjs.min.js"></script>
@@ -317,7 +318,8 @@
 						showDataForExpiry(v)
 					},false)
 					document.getElementById('show-round-toggle').addEventListener('change',(e)=>{
-						v = e.target.value
+						v = document.getElementById('show-round-toggle').checked
+						
 						if(v) {
 							document.getElementById('option-chain').classList.add('round-levels-only')
 						} else {
