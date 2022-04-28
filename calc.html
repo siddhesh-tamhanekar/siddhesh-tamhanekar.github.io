@@ -1,4 +1,6 @@
 
+
+
 <html>
 	<head>
 		<script src="https://unpkg.com/dayjs@1.8.21/dayjs.min.js"></script>
@@ -27,7 +29,9 @@
 			br{
 				display:none;
 			}
-
+			.text-red{
+				color:red;
+			}
 			input{
 				padding:5px 20px;
 				margin:2px 4px;
@@ -102,6 +106,7 @@
 				const reader = new FileReader();
 				const data = []
 				const optionChainData = []
+				const optionChainAggData = []
 				const entries =  (new zip.ZipReader(new zip.BlobReader(file))).getEntries()
 				.then((entries) => entries[0].getData(new zip.TextWriter()))
 				.then((content) =>  {
@@ -130,6 +135,9 @@
 					display(data)
 				
 				});
+				function numberWithCommas(x) {
+    return x.toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",");
+}
 
 				function formatNumber(n) {
 					if(n) {
@@ -177,24 +185,39 @@
 					
 					
 					if (undefined === optionChainData[exp]) {
-						optionChainData[exp] = []
+						optionChainData[exp] = [
+							
+						]
+						optionChainAggData[exp] = {
+							'maxOiStrike':'',
+							'maxCEOiStrike':'',
+							'maxPEOiStrike':'',
+							'maxOi':0,
+							'maxCEOi':0,
+							'maxPEOi':0,
+						}
 					}
 					if (undefined === optionChainData[exp][sp]) {
 						optionChainData[exp][sp] = {
 							'date': expDate.toDateString(),
+							
 							'CE': {
 								'ltp': '',
 								'oi' :'',
 								'coi': '',
 								'per':'',
+								'voi':''
+
 							},
 							'PE': {
 								'ltp': '',
 								'oi' :'',
 								'coi': '',
 								'per':'',
+								'voi':''
 							},
-
+							'totaloi':0,
+							
 
 						}
 					}
@@ -203,7 +226,20 @@
 					optionChainData[exp][sp][optionType]['coi'] = coi
 					optionChainData[exp][sp][optionType]['voi'] = voi
 					optionChainData[exp][sp][optionType]['vcoi'] = vcoi
+					optionChainData[exp][sp]['totaloi'] += oi 
 					optionChainData[exp][sp][optionType]['per'] = formatNumber(coi/ oi)
+					
+					
+					if(optionType == 'CE' && optionChainAggData[exp]['maxCEOi'] <= voi ) {
+						optionChainAggData[exp]['maxCEOi']  = voi
+						optionChainAggData[exp]['maxCEOiStrike'] = sp 
+					}
+					
+					if(optionType == 'PE' && optionChainAggData[exp]['maxPEOi'] <= voi ) {
+						optionChainAggData[exp]['maxPEOi']  = voi
+						optionChainAggData[exp]['maxPEOiStrike'] = sp 
+					}
+
 					if (undefined === data[exp]) {
 						data[exp] = {
 							'date': expDate.toDateString(),
@@ -212,7 +248,7 @@
 								'coi': 0,
 								'itmoi' : 0,
 								'itmcoi' : 0,
-								'per':0
+								'per':0,
 							},
 							'PE': {
 								'oi' :0,
@@ -221,6 +257,7 @@
 								'itmcoi' : 0,
 								'per':0
 							},
+							
 
 
 						}
@@ -295,6 +332,7 @@
 								<td colspan='2'> ${expiry_dropdown} </td>
 							</tr>
 							<tr>
+								<td>VOI</td>
 								<td>COI %</td>
 								<td>OI Chg</td>
 								<td>OI</td>
@@ -304,6 +342,8 @@
 								<td> OI </td>
 								<td>OI Chg</td>
 								<td> COI % </td>
+								<td>VOI</td>
+								<td> CE +PE OI</td>
 							</tr>
 						<thead>
 						<tbody>
@@ -330,24 +370,29 @@
 				}
 				
 				function showDataForExpiry(exp) {
+				console.log(optionChainAggData)
 					ocdata =''
 					for(var i in optionChainData[exp]) {
 						if( i < (atm-2500) || i> (atm+2500) ) continue
 						ocdata += `
 							<tr class='${isRoundOrATM(i,atm)?'round-or-atm':''} ${atm == i?'yellow':''}'>
+								<td class='${optionChainAggData[exp]["maxCEOiStrike"] == i ? "text-red":""}'> ${numberWithCommas(formatNumber(optionChainData[exp][i]['CE']['voi']))} </td>
 								<td> ${optionChainData[exp][i]['CE']['per']} % </td>
 								<td> ${optionChainData[exp][i]['CE']['coi']} </td>
-								<td> ${optionChainData[exp][i]['CE']['oi']} </td>
+								<td > ${optionChainData[exp][i]['CE']['oi']} </td>
 								<td> ${optionChainData[exp][i]['CE']['ltp']} </td>
 								<td> ${i} </td>
 								<td> ${optionChainData[exp][i]['PE']['ltp']} </td>
-								<td> ${optionChainData[exp][i]['PE']['oi']} </td>
+								<td > ${optionChainData[exp][i]['PE']['oi']} </td>
 								<td> ${optionChainData[exp][i]['PE']['coi']} </td>
 								<td> ${optionChainData[exp][i]['PE']['per']} % </td>
+								<td class='${optionChainAggData[exp]["maxPEOiStrike"] == i?"text-red":"" }'> ${numberWithCommas(formatNumber(optionChainData[exp][i]['PE']['voi']))} </td>
+								<td>${numberWithCommas(formatNumber(optionChainData[exp][i]['totaloi']))}</td>
 							</tr>
 						`
 					}
 					document.querySelector('#option-chain tbody').innerHTML = ocdata
+					console.log(formatNumber(optionChainData[exp][i]['totaloi']))
 				}
 				
 			}
