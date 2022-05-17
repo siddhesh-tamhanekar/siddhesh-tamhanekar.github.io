@@ -1,283 +1,295 @@
-
-
-
 <html>
-	<head>
-		<script src="https://unpkg.com/dayjs@1.8.21/dayjs.min.js"></script>
-		<script src="https://gildas-lormeau.github.io/zip.js/demos/lib/zip.min.js" ></script>
-		<style>
-			table td{
-				padding:10px;
-				border:1px solid gray;
-				text-align:right;
-			}
 
-			table{
-				border-collapse:collapse;
-				border:1px solid gray;
-			}
-			.yellow{
-				background:yellow;
-			}
-			.flex {
-				display: flex;
-				align-items: center;
-			}
-			.flex label, .flex input{
-				display:inline-block;				
-			}
-			br{
-				display:none;
-			}
-			.text-red{
-				color:red;
-			}
-			input{
-				padding:5px 20px;
-				margin:2px 4px;
-				
-			}
-			input[type='submit'] {
-			}
-			#option-chain.round-levels-only tbody tr{
-				display:none;
-			}
-			#option-chain.round-levels-only tbody tr.round-or-atm{
-				display:table-row;
-			}
-			.input-form {
-				border:1px solid #ddd;
-				padding:12px;
-				margin-bottom:16px;
-			}
-#option-chain{margin-top:16px;}
-		</style>
-	</head>
+<head>
+    <script src="https://unpkg.com/dayjs@1.8.21/dayjs.min.js"></script>
+    <script src="https://gildas-lormeau.github.io/zip.js/demos/lib/zip.min.js"></script>
+    <style>
+        table td {
+            padding: 10px;
+            border: 1px solid gray;
+            text-align: right;
+        }
 
-	<body>
-		<h4 style='text-align:center'>Bhavcopy UI representation for BANKNIFTY</h4>
-		<div class='flex input-form'>
-			<div>
-				<label> Upload Fno BhavCopy (zip) </label><br>
-				<input type='file' id='file'> 
-				<input type='hidden' id='roundNumber' value='500'>
-			</div>	
-			<div>
-					<label> Close Price </label><br>
-					<input type='text' id='close'> <br>
-			</div>	
-			<div>
-				<input type='submit' onClick='analyze()'>
+        table {
+            border-collapse: collapse;
+            border: 1px solid gray;
+        }
 
-			</div>	
-			<div id='bhavcopy-details'></div>
-		</div>
-		<small>
-		Notes: 
-			<ul>
-				<li>All dates are in yyyy/m/d format</li>
-				<li>Provide closing price of the respective day as per your preference spot/future</li>
-				<li> if closing price is not provided then by default banknifty first future price from bhavcopy is retrived
-				<li>LTP in option chain data is close price from bhavcopy</li>
-				<li>Option Chain data is shown only from  atm - 2500 to atm + 2500 strike prices </li>
-				<li>Total OI Data calculations are done using settlementPrice</li>
-				<li> You can download bhavcopy from <a href='https://www.nseindia.com/all-reports-derivatives' targt='_blank'>NSE website</a> please download one which has csv in the name</li>
-			</ul>
-		</small>
-		<div id="results">
+        .yellow {
+            background: yellow;
+        }
 
-		</div>
+        .flex {
+            display: flex;
+            align-items: center;
+        }
 
-		<script>
-			function analyze(){
-				const fileInput = document.getElementById('file')
-				const closeInput = document.getElementById('close')
-				document.getElementById('bhavcopy-details').innerHTML=''
-				 close = closeInput.value;
-				 atm = Math.trunc( close / 100 ) * 100
-				const roundNumber = 500
-				if(fileInput.files.length == 0 ){
-					alert("please add file")
-					return
-				}
-				const [file] = fileInput.files
-				
-				
-				const reader = new FileReader();
-				const data = []
-				const optionChainData = []
-				const optionChainAggData = []
-				const entries =  (new zip.ZipReader(new zip.BlobReader(file))).getEntries()
-				.then((entries) => entries[0].getData(new zip.TextWriter()))
-				.then((content) =>  {
-					
-					content.split('\n').forEach( (value ) => {
-						if(-1 == value.indexOf('BANKNIFTY')  ) {
-							return
-						}
-						line = value.split(",");
-						if(line.length < 15) {
-							alert("wrong file columns")
-							return
-						}
-						processLine(line)
+        .flex label,
+        .flex input {
+            display: inline-block;
+        }
 
-					});
-					for(var i in data) {
-						v = data[i]
-						//console.log(i,v)
-						v['CE']['per_oi'] = formatNumber(v['CE']['itmoi'] / v['CE']['oi'])
-						v['PE']['per_oi'] = formatNumber(v['PE']['itmoi'] / v['PE']['oi'])
-						v['CE']['per_coi'] =formatNumber( v['CE']['itmcoi'] / v['CE']['coi'])
-						v['PE']['per_coi'] =formatNumber( v['PE']['itmcoi'] / v['PE']['coi'])
-						data[i] = v
-					}
-					display(data)
-				
-				});
-				function numberWithCommas(x) {
-    return x.toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",");
-}
+        br {
+            display: none;
+        }
 
-				function formatNumber(n) {
-					if(n) {
-						return (n*100).toFixed(2)
+        .text-red {
+            color: red;
+        }
 
-					}else {
-						return n;
-					}
-				}
-				function processLine(line ) {
-					if(line[0] == 'FUTIDX') {
-						if(line[1] == 'BANKNIFTY') {
-						bhavCopyDiv = document.getElementById('bhavcopy-details')
-							if(bhavCopyDiv.innerHTML == '') {
-								bhtml = '<p>BhavCopy Date = ' + line[14] +'</p>'
-								bhavCopyDiv.innerHTML = bhtml
-								if(!close) {
-									close = parseFloat(line[8])
-									atm = Math.trunc( close / 100 ) * 100
-									document.getElementById('close').value = close
-								}
-							}
-						}
-						return
-					}
-					if(line[1] != 'BANKNIFTY') return
-					const expDate = new Date(line[2])
-					var day = dayjs(expDate)
-					var next2MonthDate = dayjs().add(60, 'day')
-					
-					const exp = expDate.getFullYear() + "/"+(expDate.getMonth()+1)+"/"+ expDate.getDate();
-					if(day.isAfter(next2MonthDate)){
-						return
-					}
-					const sp = parseInt(line[3])
-					const optionType = line[4]
+        input {
+            padding: 5px 20px;
+            margin: 2px 4px;
 
-					const settlementPrice = parseFloat(line[9])
+        }
 
-					const oi = parseInt(line[12])
-					const coi = parseInt(line[13])
-					
-					const voi = settlementPrice * oi
-					const vcoi = settlementPrice * coi
-					
-					
-					if (undefined === optionChainData[exp]) {
-						optionChainData[exp] = [
-							
-						]
-						optionChainAggData[exp] = {
-							'maxOiStrike':'',
-							'maxCEOiStrike':'',
-							'maxPEOiStrike':'',
-							'maxOi':0,
-							'maxCEOi':0,
-							'maxPEOi':0,
-						}
-					}
-					if (undefined === optionChainData[exp][sp]) {
-						optionChainData[exp][sp] = {
-							'date': expDate.toDateString(),
-							
-							'CE': {
-								'ltp': '',
-								'oi' :'',
-								'coi': '',
-								'per':'',
-								'voi':''
+        input[type='submit'] {}
 
-							},
-							'PE': {
-								'ltp': '',
-								'oi' :'',
-								'coi': '',
-								'per':'',
-								'voi':''
-							},
-							'totaloi':0,
-							
+        #option-chain.round-levels-only tbody tr {
+            display: none;
+        }
 
-						}
-					}
-					optionChainData[exp][sp][optionType]['ltp'] = parseFloat(line[8])
-					optionChainData[exp][sp][optionType]['oi'] = oi
-					optionChainData[exp][sp][optionType]['coi'] = coi
-					optionChainData[exp][sp][optionType]['voi'] = voi
-					optionChainData[exp][sp][optionType]['vcoi'] = vcoi
-					optionChainData[exp][sp]['totaloi'] += oi 
-					optionChainData[exp][sp][optionType]['per'] = formatNumber(coi/ oi)
-					
-					
-					if(optionType == 'CE' && optionChainAggData[exp]['maxCEOi'] <= voi ) {
-						optionChainAggData[exp]['maxCEOi']  = voi
-						optionChainAggData[exp]['maxCEOiStrike'] = sp 
-					}
-					
-					if(optionType == 'PE' && optionChainAggData[exp]['maxPEOi'] <= voi ) {
-						optionChainAggData[exp]['maxPEOi']  = voi
-						optionChainAggData[exp]['maxPEOiStrike'] = sp 
-					}
+        #option-chain.round-levels-only tbody tr.round-or-atm {
+            display: table-row;
+        }
 
-					if (undefined === data[exp]) {
-						data[exp] = {
-							'date': expDate.toDateString(),
-							'CE': {
-								'oi' :0,
-								'coi': 0,
-								'itmoi' : 0,
-								'itmcoi' : 0,
-								'per':0,
-							},
-							'PE': {
-								'oi' :0,
-								'coi': 0,
-								'itmoi' : 0,
-								'itmcoi' : 0,
-								'per':0
-							},
-							
+        .input-form {
+            border: 1px solid #ddd;
+            padding: 12px;
+            margin-bottom: 16px;
+        }
+
+        #option-chain {
+            margin-top: 16px;
+        }
+    </style>
+</head>
+
+<body>
+    <h4 style='text-align:center'>Bhavcopy UI representation for BANKNIFTY</h4>
+    <div class='flex input-form'>
+        <div>
+            <label> Upload Fno BhavCopy (zip) </label><br>
+            <input type='file' id='file'>
+            <input type='hidden' id='roundNumber' value='500'>
+        </div>
+        <div>
+            <label> Close Price </label><br>
+            <input type='text' id='close'> <br>
+        </div>
+        <div>
+            <input type='submit' onClick='analyze()'>
+
+        </div>
+        <div id='bhavcopy-details'></div>
+    </div>
+    <small>
+        Notes:
+        <ul>
+            <li>All dates are in yyyy/m/d format</li>
+            <li>Provide closing price of the respective day as per your preference spot/future</li>
+            <li> if closing price is not provided then by default banknifty first future price from bhavcopy is retrived
+            <li>LTP in option chain data is close price from bhavcopy</li>
+            <li>Option Chain data is shown only from atm - 2500 to atm + 2500 strike prices </li>
+            <li>Total OI Data calculations are done using settlementPrice</li>
+            <li> You can download bhavcopy from <a href='https://www.nseindia.com/all-reports-derivatives'
+                    targt='_blank'>NSE website</a> please download one which has csv in the name</li>
+        </ul>
+    </small>
+    <div id="results">
+
+    </div>
+
+    <script>
+        function analyze() {
+            const fileInput = document.getElementById('file')
+            const closeInput = document.getElementById('close')
+            document.getElementById('bhavcopy-details').innerHTML = ''
+            close = closeInput.value;
+            atm = Math.trunc(close / 100) * 100
+            const roundNumber = 500
+            if (fileInput.files.length == 0) {
+                alert("please add file")
+                return
+            }
+            const [file] = fileInput.files
 
 
-						}
-					}
-					if(sp>= close && optionType == 'PE' ) {
-						data[exp][optionType]['itmoi'] += voi
-						data[exp][optionType]['itmcoi'] += vcoi
-					}
+            const reader = new FileReader();
+            const data = []
+            const optionChainData = []
+            const optionChainAggData = []
+            const entries = (new zip.ZipReader(new zip.BlobReader(file))).getEntries()
+                .then((entries) => entries[0].getData(new zip.TextWriter()))
+                .then((content) => {
 
-					if(sp<= close && optionType == 'CE' ) {
-						data[exp][optionType]['itmoi'] += voi
-						data[exp][optionType]['itmcoi'] += vcoi
-					}
-					data[exp][optionType]['oi'] += voi
-					data[exp][optionType]['coi'] += vcoi
+                    content.split('\n').forEach((value) => {
+                        if (-1 == value.indexOf('BANKNIFTY')) {
+                            return
+                        }
+                        line = value.split(",");
+                        if (line.length < 15) {
+                            alert("wrong file columns")
+                            return
+                        }
+                        processLine(line)
 
-				}
+                    });
+                    for (var i in data) {
+                        v = data[i]
+                        //console.log(i,v)
+                        v['CE']['per_oi'] = formatNumber(v['CE']['itmoi'] / v['CE']['oi'])
+                        v['PE']['per_oi'] = formatNumber(v['PE']['itmoi'] / v['PE']['oi'])
+                        v['CE']['per_coi'] = formatNumber(v['CE']['itmcoi'] / v['CE']['coi'])
+                        v['PE']['per_coi'] = formatNumber(v['PE']['itmcoi'] / v['PE']['coi'])
+                        data[i] = v
+                    }
+                    display(data)
 
-				function display(data) {
-					html = `<table>
+                });
+            function numberWithCommas(x) {
+                return x.toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",");
+            }
+
+            function formatNumber(n) {
+                if (n) {
+                    return (n * 100).toFixed(2)
+
+                } else {
+                    return n;
+                }
+            }
+            function processLine(line) {
+                if (line[0] == 'FUTIDX') {
+                    if (line[1] == 'BANKNIFTY') {
+                        bhavCopyDiv = document.getElementById('bhavcopy-details')
+                        if (bhavCopyDiv.innerHTML == '') {
+                            bhtml = '<p>BhavCopy Date = ' + line[14] + '</p>'
+                            bhavCopyDiv.innerHTML = bhtml
+                            if (!close) {
+                                close = parseFloat(line[8])
+                                atm = Math.trunc(close / 100) * 100
+                                document.getElementById('close').value = close
+                            }
+                        }
+                    }
+                    return
+                }
+                if (line[1] != 'BANKNIFTY') return
+                const expDate = new Date(line[2])
+                var day = dayjs(expDate)
+                var next2MonthDate = dayjs().add(60, 'day')
+
+                const exp = expDate.getFullYear() + "/" + (expDate.getMonth() + 1) + "/" + expDate.getDate();
+                if (day.isAfter(next2MonthDate)) {
+                    return
+                }
+                const sp = parseInt(line[3])
+                const optionType = line[4]
+
+                const settlementPrice = parseFloat(line[9])
+
+                const oi = parseInt(line[12])
+                const coi = parseInt(line[13])
+
+                const voi = settlementPrice * oi
+                const vcoi = settlementPrice * coi
+
+
+                if (undefined === optionChainData[exp]) {
+                    optionChainData[exp] = [
+
+                    ]
+                    optionChainAggData[exp] = {
+                        'maxOiStrike': '',
+                        'maxCEOiStrike': '',
+                        'maxPEOiStrike': '',
+                        'maxOi': 0,
+                        'maxCEOi': 0,
+                        'maxPEOi': 0,
+                    }
+                }
+                if (undefined === optionChainData[exp][sp]) {
+                    optionChainData[exp][sp] = {
+                        'date': expDate.toDateString(),
+
+                        'CE': {
+                            'ltp': '',
+                            'oi': '',
+                            'coi': '',
+                            'per': '',
+                            'voi': ''
+
+                        },
+                        'PE': {
+                            'ltp': '',
+                            'oi': '',
+                            'coi': '',
+                            'per': '',
+                            'voi': ''
+                        },
+                        'totaloi': 0,
+
+
+                    }
+                }
+                optionChainData[exp][sp][optionType]['ltp'] = parseFloat(line[8])
+                optionChainData[exp][sp][optionType]['oi'] = oi
+                optionChainData[exp][sp][optionType]['coi'] = coi
+                optionChainData[exp][sp][optionType]['voi'] = voi
+                optionChainData[exp][sp][optionType]['vcoi'] = vcoi
+                optionChainData[exp][sp]['totaloi'] += oi
+                optionChainData[exp][sp][optionType]['per'] = formatNumber(coi / oi)
+
+
+                if (optionType == 'CE' && optionChainAggData[exp]['maxCEOi'] <= voi) {
+                    optionChainAggData[exp]['maxCEOi'] = voi
+                    optionChainAggData[exp]['maxCEOiStrike'] = sp
+                }
+
+                if (optionType == 'PE' && optionChainAggData[exp]['maxPEOi'] <= voi) {
+                    optionChainAggData[exp]['maxPEOi'] = voi
+                    optionChainAggData[exp]['maxPEOiStrike'] = sp
+                }
+
+                if (undefined === data[exp]) {
+                    data[exp] = {
+                        'date': expDate.toDateString(),
+                        'CE': {
+                            'oi': 0,
+                            'coi': 0,
+                            'itmoi': 0,
+                            'itmcoi': 0,
+                            'per': 0,
+                        },
+                        'PE': {
+                            'oi': 0,
+                            'coi': 0,
+                            'itmoi': 0,
+                            'itmcoi': 0,
+                            'per': 0
+                        },
+
+
+
+                    }
+                }
+                if (sp >= close && optionType == 'PE') {
+                    data[exp][optionType]['itmoi'] += voi
+                    data[exp][optionType]['itmcoi'] += vcoi
+                }
+
+                if (sp <= close && optionType == 'CE') {
+                    data[exp][optionType]['itmoi'] += voi
+                    data[exp][optionType]['itmcoi'] += vcoi
+                }
+                data[exp][optionType]['oi'] += voi
+                data[exp][optionType]['coi'] += vcoi
+
+            }
+
+            function display(data) {
+                html = `<table>
 								<tr><td style="text-align:center" colspan='13'>EOD Total OI Data</td></tr>					
 								<tr>
 									<td> Expiry</td>
@@ -295,8 +307,8 @@
 									<td class="yellow"> PE COI %</td>
 								</tr>`
 
-					for(var i in data) {
-						html+=`<tr>
+                for (var i in data) {
+                    html += `<tr>
 					<td> ${i}</td>
 					<td> ${data[i]['CE']['itmoi']}</td>
 					<td> ${data[i]['CE']['oi']}</td>
@@ -311,17 +323,17 @@
 					<td> ${data[i]['PE']['coi']}</td>
 					<td class="yellow"> ${data[i]['PE']['per_coi']} %</td>
 				</tr>`
-					}
-					
-					expiries = Object.keys(optionChainData)
-					expiry_dropdown = '<select id="exp-dropdown">'
-					for (var i in expiries) {
-						expiry_dropdown +='<option value="'+ expiries[i] +'">' + expiries[i] +'</option>'
-					}
-					expiry_dropdown += '</select>'
-					//console.log(expiry_dropdown)
-					selectedExpiry  = expiries[0]
-					html+=`</table>
+                }
+
+                expiries = Object.keys(optionChainData)
+                expiry_dropdown = '<select id="exp-dropdown">'
+                for (var i in expiries) {
+                    expiry_dropdown += '<option value="' + expiries[i] + '">' + expiries[i] + '</option>'
+                }
+                expiry_dropdown += '</select>'
+                //console.log(expiry_dropdown)
+                selectedExpiry = expiries[0]
+                html += `</table>
 					
 					<table id="option-chain" >
 						<thead>
@@ -344,39 +356,43 @@
 								<td> COI % </td>
 								<td>VOI</td>
 								<td> CE +PE OI</td>
+								<td> V-PCR</td>
+								<td> Hold</td>
 							</tr>
 						<thead>
 						<tbody>
 						</tbody>
 						
 					`;
-					
-					html+='</table>'
-					document.getElementById('results').innerHTML = html
-					document.getElementById('exp-dropdown').addEventListener('change',(e)=>{
-						v = e.target.value
-						showDataForExpiry(v)
-					},false)
-					document.getElementById('show-round-toggle').addEventListener('change',(e)=>{
-						v = document.getElementById('show-round-toggle').checked
-						
-						if(v) {
-							document.getElementById('option-chain').classList.add('round-levels-only')
-						} else {
-							document.getElementById('option-chain').classList.remove('round-levels-only')
-						}
-					},false)
-					showDataForExpiry(selectedExpiry)
-				}
-				
-				function showDataForExpiry(exp) {
-				console.log(optionChainAggData)
-					ocdata =''
-					for(var i in optionChainData[exp]) {
-						if( i < (atm-2500) || i> (atm+2500) ) continue
-						ocdata += `
-							<tr class='${isRoundOrATM(i,atm)?'round-or-atm':''} ${atm == i?'yellow':''}'>
-								<td class='${optionChainAggData[exp]["maxCEOiStrike"] == i ? "text-red":""}'> ${numberWithCommas(formatNumber(optionChainData[exp][i]['CE']['voi']))} </td>
+
+                html += '</table>'
+                document.getElementById('results').innerHTML = html
+                document.getElementById('exp-dropdown').addEventListener('change', (e) => {
+                    v = e.target.value
+                    showDataForExpiry(v)
+                }, false)
+                document.getElementById('show-round-toggle').addEventListener('change', (e) => {
+                    v = document.getElementById('show-round-toggle').checked
+
+                    if (v) {
+                        document.getElementById('option-chain').classList.add('round-levels-only')
+                    } else {
+                        document.getElementById('option-chain').classList.remove('round-levels-only')
+                    }
+                }, false)
+                showDataForExpiry(selectedExpiry)
+            }
+
+            function showDataForExpiry(exp) {
+                console.log(optionChainAggData)
+                ocdata = ''
+                for (var i in optionChainData[exp]) {
+                    if (i < (atm - 2500) || i > (atm + 2500)) continue
+                    vpcr = optionChainData[exp][i]['PE']['voi'] / optionChainData[exp][i]['CE']['voi']
+
+                    ocdata += `
+							<tr class='${isRoundOrATM(i, atm) ? 'round-or-atm' : ''} ${atm == i ? 'yellow' : ''}'>
+								<td class='${optionChainAggData[exp]["maxCEOiStrike"] == i ? "text-red" : ""}'> ${numberWithCommas(formatNumber(optionChainData[exp][i]['CE']['voi']))} </td>
 								<td> ${optionChainData[exp][i]['CE']['per']} % </td>
 								<td> ${optionChainData[exp][i]['CE']['coi']} </td>
 								<td > ${optionChainData[exp][i]['CE']['oi']} </td>
@@ -386,27 +402,30 @@
 								<td > ${optionChainData[exp][i]['PE']['oi']} </td>
 								<td> ${optionChainData[exp][i]['PE']['coi']} </td>
 								<td> ${optionChainData[exp][i]['PE']['per']} % </td>
-								<td class='${optionChainAggData[exp]["maxPEOiStrike"] == i?"text-red":"" }'> ${numberWithCommas(formatNumber(optionChainData[exp][i]['PE']['voi']))} </td>
+								<td class='${optionChainAggData[exp]["maxPEOiStrike"] == i ? "text-red" : ""}'> ${numberWithCommas(formatNumber(optionChainData[exp][i]['PE']['voi']))} </td>
 								<td>${numberWithCommas(formatNumber(optionChainData[exp][i]['totaloi']))}</td>
+								<td>${vpcr.toFixed(3)}</td>
+                                <td>${vpcr > 1.1 ? 'BULL' : (vpcr < 0.9) ? 'BEAR' : 'WAR'} </td>
 							</tr>
 						`
-					}
-					document.querySelector('#option-chain tbody').innerHTML = ocdata
-					console.log(formatNumber(optionChainData[exp][i]['totaloi']))
-				}
-				
-			}
-			function isRoundOrATM(intNumber, atm) {
-			roundNumber = document.getElementById('roundNumber').value
-				var res = intNumber % roundNumber == 0
-				if(!res) {
-					res = intNumber == atm 
-				}
-				return res
-			}
-			
+                }
+                document.querySelector('#option-chain tbody').innerHTML = ocdata
+                console.log(formatNumber(optionChainData[exp][i]['totaloi']))
+            }
+
+        }
+        function isRoundOrATM(intNumber, atm) {
+            roundNumber = document.getElementById('roundNumber').value
+            var res = intNumber % roundNumber == 0
+            if (!res) {
+                res = intNumber == atm
+            }
+            return res
+        }
 
 
-		</script>
-	</body>
+
+    </script>
+</body>
+
 </html>
