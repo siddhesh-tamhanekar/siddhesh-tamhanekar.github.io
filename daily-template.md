@@ -19,7 +19,7 @@ Continuation / Reversal?
 ### Scan Performed
 Scan Link | No Of Stocks
 |--|--
-abcd | 300
+https://chartink.com/screener/momentum-burst-98630 | 300
 aper| 234
 Tommorow Picks
 
